@@ -1,11 +1,11 @@
-import { Product } from "@/constants/products";
+import type { ProductListProps } from "@/interfaces";
 import Image from "next/image";
 
-export default function ProductCard({ product }: { product: Product }) {
+const ProductCard: React.FC<ProductListProps> = ({ product }) => {
   return (
     <div className="bg-white shadow-md rounded-2xl overflow-hidden hover:shadow-lg transition">
       <Image
-        src={product.image}
+        src={product.image_url}
         alt={product.name}
         width={500}
         height={500}
@@ -22,4 +22,6 @@ export default function ProductCard({ product }: { product: Product }) {
       </div>
     </div>
   );
-}
+};
+
+export default ProductCard;

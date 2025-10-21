@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { supabase } from "@/lib/supabaseClient";
-import { DEMO_PRODUCTS } from "@/constants/products";
+import { ProductProps } from "@/interfaces";
 import ProductCard from "@/components/common/ProductCard";
 import Link from "next/link";
 
@@ -8,6 +8,7 @@ export default function Home() {
   const [user, setUser] = useState<any>(null);
   const [loading, setLoading] = useState(true);
   const [isVisible, setIsVisible] = useState(false);
+  const [products, setProducts] = useState<ProductProps[]>([]);
 
   useEffect(() => {
     supabase.auth.getUser().then(({ data }) => {
@@ -116,7 +117,7 @@ export default function Home() {
             </div>
 
             <div className="grid sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-8">
-              {DEMO_PRODUCTS.map((product, index) => (
+              {products.map((product, index) => (
                 <div
                   key={product.id}
                   className="transform transition-all duration-500 hover:-translate-y-2"
@@ -125,7 +126,7 @@ export default function Home() {
                     animation: "fadeInUp 0.6s ease-out forwards",
                   }}
                 >
-                  <ProductCard product={product} />
+                  <ProductCard key={product.id} product={product} />
                 </div>
               ))}
             </div>
