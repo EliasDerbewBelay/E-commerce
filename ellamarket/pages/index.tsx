@@ -1,44 +1,20 @@
-import MainLayout from "@/components/layouts/MainLayout";
-import ProductCard from "@/components/common/ProductCard";
-import { useEffect, useState } from "react";
-import { supabase } from "@/lib/supabaseClient";
-import { ProductProps } from "@/interfaces";
-import Link from "next/link";
-
-export default function Home() {
-  const [products, setProducts] = useState<ProductProps[]>([]);
-
-  useEffect(() => {
-    async function fetchProducts() {
-      const { data, error } = await supabase
-        .from("products")
-        .select("*")
-        .limit(8);
-      if (!error && data) setProducts(data);
-    }
-    fetchProducts();
-  }, []);
-
+import Button from "@/components/common/Button";
+const Home: React.FC = () => {
   return (
-    <MainLayout>
-      <section className="text-center py-16 ">
-        <h1 className="text-4xl font-bold mb-4">Welcome to EllaMarket</h1>
-        <p className="text-gray-600 mb-10">
-          Discover premium products curated just for you.
-        </p>
-        <Link
-          href="/products"
-          className="bg-yellow-500 text-white px-6 py-3 rounded-lg font-medium hover:bg-yellow-600 transition"
-        >
-          Browse All Products
-        </Link>
-      </section>
-
-      <section className="py-10 grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-8 px-6">
-        {products.map((product) => (
-          <ProductCard key={product.id} product={product} />
-        ))}
-      </section>
-    </MainLayout>
+    <div className="flex flex-col min-h-screen justify-center items-center gap-3">
+      <h1 className="text-5xl font-semibold text-slate-700">
+        Welcome To Ella's Market
+      </h1>
+      <p className="text-slate-400 text-xl ">
+        Lorem ipsum dolor sit amet consectetur, adipisicing elit. Earum,
+        voluptas.
+      </p>
+      <Button
+        style="bg-blue-500 rounded-full px-4 p-1 text-white cursor-pointer hover:shadow-lg"
+        title="Let's Start"
+      />
+    </div>
   );
-}
+};
+
+export default Home;
