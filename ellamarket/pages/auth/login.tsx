@@ -5,10 +5,10 @@ import {
   Mail,
   Lock,
   ArrowRight,
-  Facebook,
-  Github,
-  Link,
+  User,
+  Shield,
 } from "lucide-react";
+import Link from "next/link";
 
 const Login: React.FC = () => {
   const [showPassword, setShowPassword] = useState(false);
@@ -17,6 +17,7 @@ const Login: React.FC = () => {
     password: "",
     rememberMe: false,
   });
+  const [isLoading, setIsLoading] = useState(false);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value, type, checked } = e.target;
@@ -26,29 +27,43 @@ const Login: React.FC = () => {
     }));
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    // Handle login logic here
-    console.log("Login submitted:", formData);
+    setIsLoading(true);
+
+    // Simulate API call
+    try {
+      console.log("Login submitted:", formData);
+      // await yourLoginAPI(formData);
+      await new Promise((resolve) => setTimeout(resolve, 1500)); // Simulate API delay
+    } catch (error) {
+      console.error("Login error:", error);
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 to-blue-100 flex items-center justify-center p-4">
-      <div className="max-w-md w-full bg-white rounded-2xl shadow-2xl overflow-hidden">
+    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-100 flex items-center justify-center p-4">
+      <div className="max-w-md w-full bg-white rounded-3xl shadow-2xl overflow-hidden border border-slate-200">
         {/* Header Section */}
-        <div className="bg-gradient-to-r from-blue-600 to-purple-600 p-8 text-center text-white">
-          <div className="flex items-center justify-center space-x-3 mb-4">
-            <div className="bg-white p-2 rounded-xl">
-              <h1 className="font-bold text-2xl text-blue-600">E</h1>
+        <div className="bg-gradient-to-br from-slate-900 to-slate-700 p-8 text-center text-white relative overflow-hidden">
+          {/* Background Pattern */}
+          <div className="absolute inset-0 bg-black/10"></div>
+          <div className="relative">
+            <div className="flex items-center justify-center space-x-3 mb-4">
+              <div className="bg-yellow-400 p-2 rounded-xl shadow-lg">
+                <User className="w-6 h-6 text-slate-900" />
+              </div>
+              <h1 className="font-bold text-2xl">
+                Ella<span className="text-yellow-400">Market</span>
+              </h1>
             </div>
-            <h1 className="font-bold text-2xl">
-              Ella<span className="text-yellow-300">Market</span>
-            </h1>
+            <h2 className="text-3xl font-bold mb-2">Welcome Back</h2>
+            <p className="text-slate-300 opacity-90">
+              Sign in to access your account and continue shopping
+            </p>
           </div>
-          <h2 className="text-3xl font-bold mb-2">Welcome Back</h2>
-          <p className="text-blue-100 opacity-90">
-            Sign in to your account to continue shopping
-          </p>
         </div>
 
         {/* Login Form */}
@@ -56,51 +71,51 @@ const Login: React.FC = () => {
           <form onSubmit={handleSubmit} className="space-y-6">
             {/* Email Field */}
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                Email Address *
+              <label className="block text-sm font-semibold text-slate-700 mb-3">
+                Email Address
               </label>
               <div className="relative">
-                <Mail className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
+                <Mail className="absolute left-4 top-1/2 transform -translate-y-1/2 text-slate-400 w-5 h-5" />
                 <input
                   type="email"
                   name="email"
                   value={formData.email}
                   onChange={handleChange}
                   required
-                  className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-200"
-                  placeholder="your.email@example.com"
+                  className="w-full pl-12 pr-4 py-4 border border-slate-300 rounded-xl focus:ring-2 focus:ring-slate-900 focus:border-slate-900 transition-all duration-200 bg-white placeholder-slate-400"
+                  placeholder="Enter your email"
                 />
               </div>
             </div>
 
             {/* Password Field */}
             <div>
-              <div className="flex items-center justify-between mb-2">
-                <label className="block text-sm font-medium text-gray-700">
-                  Password *
+              <div className="flex items-center justify-between mb-3">
+                <label className="block text-sm font-semibold text-slate-700">
+                  Password
                 </label>
-                <a
+                <Link
                   href="/forgot-password"
-                  className="text-sm text-blue-600 hover:text-blue-800 hover:underline transition-colors duration-200"
+                  className="text-sm text-slate-600 hover:text-slate-900 hover:underline transition-colors duration-200"
                 >
                   Forgot password?
-                </a>
+                </Link>
               </div>
               <div className="relative">
-                <Lock className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
+                <Lock className="absolute left-4 top-1/2 transform -translate-y-1/2 text-slate-400 w-5 h-5" />
                 <input
                   type={showPassword ? "text" : "password"}
                   name="password"
                   value={formData.password}
                   onChange={handleChange}
                   required
-                  className="w-full pl-10 pr-12 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-200"
+                  className="w-full pl-12 pr-12 py-4 border border-slate-300 rounded-xl focus:ring-2 focus:ring-slate-900 focus:border-slate-900 transition-all duration-200 bg-white placeholder-slate-400"
                   placeholder="Enter your password"
                 />
                 <button
                   type="button"
                   onClick={() => setShowPassword(!showPassword)}
-                  className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600 transition-colors duration-200"
+                  className="absolute right-4 top-1/2 transform -translate-y-1/2 text-slate-400 hover:text-slate-600 transition-colors duration-200 p-1"
                 >
                   {showPassword ? (
                     <EyeOff className="w-5 h-5" />
@@ -111,68 +126,53 @@ const Login: React.FC = () => {
               </div>
             </div>
 
-            {/* Remember Me & Forgot Password */}
+            {/* Remember Me */}
             <div className="flex items-center justify-between">
-              <label className="flex items-center space-x-2">
-                <input
-                  type="checkbox"
-                  name="rememberMe"
-                  checked={formData.rememberMe}
-                  onChange={handleChange}
-                  className="w-4 h-4 text-blue-600 rounded focus:ring-blue-500 border-gray-300"
-                />
-                <span className="text-sm text-gray-700">Remember me</span>
+              <label className="flex items-center space-x-3 cursor-pointer group">
+                <div className="relative">
+                  <input
+                    type="checkbox"
+                    name="rememberMe"
+                    checked={formData.rememberMe}
+                    onChange={handleChange}
+                    className="w-5 h-5 text-slate-900 rounded-lg focus:ring-slate-900 border-slate-300 cursor-pointer group-hover:border-slate-400 transition-colors duration-200"
+                  />
+                </div>
+                <span className="text-sm text-slate-700 group-hover:text-slate-900 transition-colors duration-200">
+                  Keep me signed in
+                </span>
               </label>
             </div>
 
             {/* Login Button */}
             <button
               type="submit"
-              className="w-full bg-gradient-to-r from-blue-600 to-purple-600 text-white py-3 px-6 rounded-lg font-semibold hover:from-blue-700 hover:to-purple-700 transform hover:-translate-y-0.5 transition-all duration-200 shadow-lg hover:shadow-xl flex items-center justify-center space-x-2"
+              disabled={isLoading}
+              className="w-full bg-slate-900 text-white py-4 px-6 rounded-xl font-semibold hover:bg-slate-800 disabled:bg-slate-400 disabled:cursor-not-allowed transform hover:-translate-y-0.5 disabled:transform-none transition-all duration-300 shadow-lg hover:shadow-xl flex items-center justify-center space-x-3 group"
             >
-              <span>Sign In</span>
-              <ArrowRight className="w-5 h-5" />
+              {isLoading ? (
+                <>
+                  <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+                  <span>Signing in...</span>
+                </>
+              ) : (
+                <>
+                  <span>Sign In</span>
+                  <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform duration-200" />
+                </>
+              )}
             </button>
 
-            {/* Divider */}
-            <div className="relative">
-              <div className="absolute inset-0 flex items-center">
-                <div className="w-full border-t border-gray-300"></div>
-              </div>
-              <div className="relative flex justify-center text-sm">
-                <span className="px-2 bg-white text-gray-500">
-                  Or continue with
-                </span>
-              </div>
-            </div>
-
-            {/* Social Login Buttons */}
-            <div className="grid grid-cols-2 gap-3">
-              <button
-                type="button"
-                className="w-full bg-gray-50 border border-gray-300 text-gray-700 py-2 px-4 rounded-lg font-medium hover:bg-gray-100 transition-colors duration-200 flex items-center justify-center space-x-2"
-              >
-                <Facebook className="w-5 h-5 text-blue-600" />
-                <span>Facebook</span>
-              </button>
-              <button
-                type="button"
-                className="w-full bg-gray-50 border border-gray-300 text-gray-700 py-2 px-4 rounded-lg font-medium hover:bg-gray-100 transition-colors duration-200 flex items-center justify-center space-x-2"
-              >
-                <Github className="w-5 h-5 text-gray-800" />
-                <span>GitHub</span>
-              </button>
-            </div>
-
             {/* Registration Link */}
-            <div className="text-center">
-              <p className="text-gray-600">
-                Don't have an account?{" "}
+            <div className="text-center pt-4">
+              <p className="text-slate-600">
+                New to EllaMarket?{" "}
                 <Link
                   href="/register"
-                  className="text-blue-600 font-semibold hover:underline transition-colors duration-200"
+                  className="text-slate-900 font-semibold hover:text-slate-700 hover:underline transition-colors duration-200 inline-flex items-center space-x-1"
                 >
-                  Create one here
+                  <span>Create account</span>
+                  <ArrowRight className="w-4 h-4" />
                 </Link>
               </p>
             </div>
@@ -180,10 +180,13 @@ const Login: React.FC = () => {
         </div>
 
         {/* Security Notice */}
-        <div className="bg-gray-50 border-t border-gray-200 p-4 text-center">
-          <p className="text-xs text-gray-500">
-            🔒 Your login information is encrypted and secure
-          </p>
+        <div className="bg-slate-50 border-t border-slate-200 p-4 text-center">
+          <div className="flex items-center justify-center space-x-2 text-slate-600">
+            <Shield className="w-4 h-4" />
+            <p className="text-xs">
+              Your information is securely encrypted and protected
+            </p>
+          </div>
         </div>
       </div>
     </div>
