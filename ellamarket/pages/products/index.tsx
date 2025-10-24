@@ -1,18 +1,12 @@
 import { useState, useEffect } from "react";
 import { Product } from "@/types/product";
-import Image from "next/image";
-import {
-  Grid,
-  List,
-  Search,
-  ChevronDown,
-  Heart,
-  ShoppingBag,
-} from "lucide-react";
-import { useRouter } from "next/router";
+import { Grid, List, Search, ChevronDown } from "lucide-react";
+import { ProductListProps } from "@/interface";
 import Link from "next/link";
+import ProductCard from "@/components/productCards/ProductCard";
+import ProductCardListView from "@/components/productCards/ProductCardListView";
 
-const ProductsPage: React.FC = () => {
+const ProductsPage: React.FC<ProductListProps> = ({ product }) => {
   const [products, setProducts] = useState<Product[]>([]);
   const [viewMode, setViewMode] = useState<"grid" | "list">("grid");
   const [sortBy, setSortBy] = useState("newest");
@@ -22,9 +16,6 @@ const ProductsPage: React.FC = () => {
     inStock: false,
   });
   const [currentPage, setCurrentPage] = useState(1);
-  const [itemsPerPage] = useState(12);
-  const router = useRouter();
-  const { id } = router.query;
 
   useEffect(() => {
     const fetchProducts = async () => {
@@ -216,50 +207,9 @@ const ProductsPage: React.FC = () => {
                     key={product.id}
                     className="bg-white rounded-lg shadow-sm border border-slate-200 hover:shadow-md transition-shadow duration-200"
                   >
-                    {/* Product Image */}
                     <Link href={`/products/${product.id}`}>
-                      <div className="relative aspect-square bg-slate-100 rounded-t-lg overflow-hidden">
-                        <Image
-                          src={product.image_url}
-                          alt={product.name}
-                          fill
-                          className="object-cover hover:scale-105 transition-transform duration-300"
-                        />
-                        {/* Quick Actions */}
-                        <div className="absolute top-3 right-3 flex flex-col gap-2">
-                          <button className="bg-white/90 p-2 rounded-full hover:bg-white transition-colors duration-200">
-                            <Heart className="w-4 h-4 text-slate-700" />
-                          </button>
-                        </div>
-                        {/* Stock Badge */}
-                        {product.stock === 0 && (
-                          <div className="absolute top-3 left-3 bg-red-500 text-white px-2 py-1 rounded-full text-xs font-medium">
-                            Out of Stock
-                          </div>
-                        )}
-                      </div>
+                      <ProductCard product={product} />
                     </Link>
-
-                    {/* Product Info */}
-                    <div className="p-4">
-                      <h3 className="font-semibold text-slate-900 mb-1 line-clamp-2">
-                        {product.name}
-                      </h3>
-                      <p className="text-slate-600 text-sm mb-3 line-clamp-2">
-                        {product.description}
-                      </p>
-                      <div className="flex items-center justify-between">
-                        <span className="text-lg font-bold text-slate-900">
-                          ${product.price}
-                        </span>
-                        <button
-                          disabled={product.stock === 0}
-                          className="bg-slate-900 text-white p-2 rounded-lg hover:bg-slate-800 disabled:bg-slate-400 disabled:cursor-not-allowed transition-colors duration-200"
-                        >
-                          <ShoppingBag className="w-4 h-4" />
-                        </button>
-                      </div>
-                    </div>
                   </div>
                 ))}
               </div>
@@ -271,54 +221,9 @@ const ProductsPage: React.FC = () => {
                     key={product.id}
                     className="bg-white rounded-lg shadow-sm border border-slate-200 hover:shadow-md transition-shadow duration-200 p-4"
                   >
-                    <div className="flex gap-4">
-                      {/* Product Image */}
-                      <div className="relative w-24 h-24 bg-slate-100 rounded-lg overflow-hidden flex-shrink-0">
-                        <Image
-                          src={product.image_url}
-                          alt={product.name}
-                          fill
-                          className="object-cover"
-                        />
-                      </div>
-
-                      {/* Product Details */}
-                      <div className="flex-1 min-w-0">
-                        <h3 className="font-semibold text-slate-900 mb-1">
-                          {product.name}
-                        </h3>
-                        <p className="text-slate-600 text-sm mb-2 line-clamp-2">
-                          {product.description}
-                        </p>
-                        <div className="flex items-center gap-4 text-sm text-slate-500">
-                          <span>Stock: {product.stock}</span>
-                          <span>•</span>
-                          <span>
-                            Updated:{" "}
-                            {new Date(product.updated_at).toLocaleDateString()}
-                          </span>
-                        </div>
-                      </div>
-
-                      {/* Price & Actions */}
-                      <div className="flex flex-col items-end justify-between">
-                        <span className="text-xl font-bold text-slate-900">
-                          ${product.price}
-                        </span>
-                        <div className="flex items-center gap-2">
-                          <button className="p-2 text-slate-600 hover:text-slate-900 transition-colors duration-200">
-                            <Heart className="w-4 h-4" />
-                          </button>
-                          <button
-                            disabled={product.stock === 0}
-                            className="bg-slate-900 text-white px-4 py-2 rounded-lg hover:bg-slate-800 disabled:bg-slate-400 disabled:cursor-not-allowed transition-colors duration-200 flex items-center gap-2"
-                          >
-                            <ShoppingBag className="w-4 h-4" />
-                            Add to Cart
-                          </button>
-                        </div>
-                      </div>
-                    </div>
+                    <Link href={`/products/${product.id}`}>
+                      <ProductCardListView product={product} />
+                    </Link>
                   </div>
                 ))}
               </div>
