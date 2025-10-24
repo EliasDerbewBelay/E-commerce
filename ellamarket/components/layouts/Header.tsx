@@ -57,17 +57,6 @@ const Header: React.FC = () => {
               </nav>
             </div>
 
-            {/* Center Section - Search Bar */}
-            <div className="flex-1 max-w-2xl mx-8">
-              <div className="relative">
-                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-slate-400 w-5 h-5" />
-                <input
-                  type="text"
-                  placeholder="Search for products, brands and more..."
-                  className="w-full pl-10 pr-4 py-3 border border-slate-200 rounded-xl bg-slate-50 focus:bg-white focus:border-yellow-400 focus:ring-2 focus:ring-yellow-200 focus:outline-none transition-all duration-200"
-                />
-              </div>
-            </div>
 
             {/* Right Section - Actions */}
             <div className="flex items-center space-x-4">

@@ -13,6 +13,7 @@ import {
 } from "lucide-react";
 import { Product } from "@/types/product";
 import Image from "next/image";
+import Link from "next/link";
 
 const Home: React.FC = () => {
   const [products, setProducts] = useState<Product[]>([]);
@@ -90,10 +91,7 @@ const Home: React.FC = () => {
               {/* Main Heading */}
               <div className="space-y-6">
                 <h1 className="text-4xl lg:text-6xl xl:text-7xl font-bold text-slate-900 leading-tight">
-                  Welcome to{" "}
-                  <h1>
-                    Ella<span className="text-yellow-500">Market</span>
-                  </h1>
+                  Welcome to Ella<span className="text-yellow-500">Market</span>
                 </h1>
                 <p className="text-xl lg:text-2xl text-slate-600 leading-relaxed max-w-2xl">
                   Discover quality products at amazing prices. Enjoy{" "}
@@ -348,10 +346,12 @@ const Home: React.FC = () => {
 
           {/* View All Button */}
           <div className="text-center mt-12">
-            <button className="bg-white text-slate-900 border-2 border-slate-300 px-8 py-4 rounded-2xl font-semibold hover:border-slate-400 hover:bg-slate-50 transform hover:-translate-y-1 transition-all duration-300 inline-flex items-center gap-3 shadow-sm hover:shadow-md">
-              View All Products
-              <ArrowRight className="w-5 h-5" />
-            </button>
+            <Link href="/products">
+              <button className="bg-white text-slate-900 border-2 border-slate-300 px-8 py-4 rounded-2xl font-semibold hover:border-slate-400 hover:bg-slate-50 transform hover:-translate-y-1 transition-all duration-300 inline-flex items-center gap-3 shadow-sm hover:shadow-md">
+                View All Products
+                <ArrowRight className="w-5 h-5" />
+              </button>
+            </Link>
           </div>
         </div>
       </section>

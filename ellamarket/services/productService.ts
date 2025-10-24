@@ -14,3 +14,18 @@ export async function getProduct(): Promise<Product[]> {
 
   return data || [];
 }
+
+export async function getProductById(id: number): Promise<Product | null> {
+  const { data, error } = await supabase
+    .from("products")
+    .select("*")
+    .eq("id", id)
+    .single();
+
+  if (error) {
+    console.error("Error Fetching Data by product id", error.message);
+    throw new Error(error.message);
+  }
+
+  return data;
+}

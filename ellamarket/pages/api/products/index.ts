@@ -6,14 +6,14 @@ export default async function handler(
   res: NextApiResponse
 ) {
   if (req.method !== "GET") {
-    return res.status(405).json({ error: "Method Not Allowed" });
+    return res.status(405).json({ error: "Method Does Not Allowed" });
   }
 
   try {
     const products = await getProduct();
-    res.status(200).json(products);
+    return res.status(200).json(products);
   } catch (error) {
-    console.error("Error fetching products", error);
+    console.error("Data Fetching Error", error);
     res.status(500).json({ error: (error as Error).message });
   }
 }

@@ -4,14 +4,13 @@ import Image from "next/image";
 import {
   Grid,
   List,
-  Filter,
-  Sort,
   Search,
   ChevronDown,
-  Star,
   Heart,
   ShoppingBag,
 } from "lucide-react";
+import { useRouter } from "next/router";
+import Link from "next/link";
 
 const ProductsPage: React.FC = () => {
   const [products, setProducts] = useState<Product[]>([]);
@@ -24,6 +23,8 @@ const ProductsPage: React.FC = () => {
   });
   const [currentPage, setCurrentPage] = useState(1);
   const [itemsPerPage] = useState(12);
+  const router = useRouter();
+  const { id } = router.query;
 
   useEffect(() => {
     const fetchProducts = async () => {
@@ -216,26 +217,28 @@ const ProductsPage: React.FC = () => {
                     className="bg-white rounded-lg shadow-sm border border-slate-200 hover:shadow-md transition-shadow duration-200"
                   >
                     {/* Product Image */}
-                    <div className="relative aspect-square bg-slate-100 rounded-t-lg overflow-hidden">
-                      <Image
-                        src={product.image_url}
-                        alt={product.name}
-                        fill
-                        className="object-cover hover:scale-105 transition-transform duration-300"
-                      />
-                      {/* Quick Actions */}
-                      <div className="absolute top-3 right-3 flex flex-col gap-2">
-                        <button className="bg-white/90 p-2 rounded-full hover:bg-white transition-colors duration-200">
-                          <Heart className="w-4 h-4 text-slate-700" />
-                        </button>
-                      </div>
-                      {/* Stock Badge */}
-                      {product.stock === 0 && (
-                        <div className="absolute top-3 left-3 bg-red-500 text-white px-2 py-1 rounded-full text-xs font-medium">
-                          Out of Stock
+                    <Link href={`/products/${product.id}`}>
+                      <div className="relative aspect-square bg-slate-100 rounded-t-lg overflow-hidden">
+                        <Image
+                          src={product.image_url}
+                          alt={product.name}
+                          fill
+                          className="object-cover hover:scale-105 transition-transform duration-300"
+                        />
+                        {/* Quick Actions */}
+                        <div className="absolute top-3 right-3 flex flex-col gap-2">
+                          <button className="bg-white/90 p-2 rounded-full hover:bg-white transition-colors duration-200">
+                            <Heart className="w-4 h-4 text-slate-700" />
+                          </button>
                         </div>
-                      )}
-                    </div>
+                        {/* Stock Badge */}
+                        {product.stock === 0 && (
+                          <div className="absolute top-3 left-3 bg-red-500 text-white px-2 py-1 rounded-full text-xs font-medium">
+                            Out of Stock
+                          </div>
+                        )}
+                      </div>
+                    </Link>
 
                     {/* Product Info */}
                     <div className="p-4">
