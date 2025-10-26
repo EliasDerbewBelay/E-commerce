@@ -9,6 +9,8 @@ import {
   Shield,
 } from "lucide-react";
 import Link from "next/link";
+import { supabase } from "@/lib/supabaseClient";
+import { useRouter } from "next/router";
 
 const Register: React.FC = () => {
   const [showPassword, setShowPassword] = useState(false);
@@ -24,6 +26,10 @@ const Register: React.FC = () => {
     terms: false,
   });
 
+  const router = useRouter();
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
+  const [successMessage, setSuccessMessage] = useState<string | null>(null);
+
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value, type, checked } = e.target;
     setFormData((prev) => ({
@@ -34,12 +40,47 @@ const Register: React.FC = () => {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    setErrorMessage(null);
+    setSuccessMessage(null);
+
+    if (formData.password !== formData.confirmPassword) {
+      setErrorMessage("Password do not match");
+    }
+
+    if (!formData.terms) {
+      setErrorMessage("You must agree to the Terms and Pricacy Policy");
+      return;
+    }
+
     setIsLoading(true);
 
     try {
-      console.log("Form submitted:", formData);
-      // await yourRegistrationAPI(formData);
-      await new Promise((resolve) => setTimeout(resolve, 1500));
+      const { data, error } = await supabase.auth.signUp({
+        email: formData.email,
+        password: formData.password,
+        options: {
+          data: {
+            first_name: formData.firstName,
+            last_name: formData.lastName,
+            newsletter: formData.newsletter,
+          },
+        },
+      });
+
+      if (error) {
+        setErrorMessage(
+          error.message || "Failed to create account. Try again."
+        );
+        return;
+      }
+
+      setSuccessMessage(
+        "Account created successfully! Check your email for verificaton"
+      );
+
+      setTimeout(() => {
+        router.push("/login");
+      }, 1500);
     } catch (error) {
       console.error("Registration error:", error);
     } finally {
@@ -68,6 +109,17 @@ const Register: React.FC = () => {
 
         {/* Registration Form */}
         <div className="p-8">
+          {errorMessage && (
+            <div className="mb-4 text-red-600 bg-red-50 border border-red-200 rounded-lg p-3 text-sm">
+              {errorMessage}
+            </div>
+          )}
+
+          {successMessage && (
+            <div className="mb-4 text-green-600 bg-green-50 border border-green-200 rounded-lg p-3 text-sm">
+              {successMessage}
+            </div>
+          )}
           <form onSubmit={handleSubmit} className="space-y-5">
             {/* Name Fields */}
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">

@@ -19,6 +19,7 @@ export interface ProductProps {
   updated_at: string;
   rating: number;
   reviewCount: number;
+  stock: number;
 }
 
 export interface ProductListProps {
