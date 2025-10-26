@@ -9,6 +9,8 @@ import {
   Shield,
 } from "lucide-react";
 import Link from "next/link";
+import { supabase } from "@/lib/supabaseClient";
+import { useRouter } from "next/router";
 
 const Login: React.FC = () => {
   const [showPassword, setShowPassword] = useState(false);
@@ -18,6 +20,8 @@ const Login: React.FC = () => {
     rememberMe: false,
   });
   const [isLoading, setIsLoading] = useState(false);
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
+  const router = useRouter();
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value, type, checked } = e.target;
@@ -33,11 +37,20 @@ const Login: React.FC = () => {
 
     // Simulate API call
     try {
-      console.log("Login submitted:", formData);
-      // await yourLoginAPI(formData);
-      await new Promise((resolve) => setTimeout(resolve, 1500)); // Simulate API delay
+      const { data, error } = await supabase.auth.signInWithPassword({
+        email: formData.email,
+        password: formData.password,
+      });
+
+      if (error) {
+        setErrorMessage(error.message);
+        return;
+      }
+
+      router.push("/");
     } catch (error) {
       console.error("Login error:", error);
+      setErrorMessage("Something went wrong. Please try again. ");
     } finally {
       setIsLoading(false);
     }
@@ -68,6 +81,11 @@ const Login: React.FC = () => {
 
         {/* Login Form */}
         <div className="p-8">
+          {errorMessage && (
+            <div className="mb-4 text-red-600 bg-red-50 border border-red-200 rounded-lg p-3 text-sm">
+              {errorMessage}
+            </div>
+          )}
           <form onSubmit={handleSubmit} className="space-y-6">
             {/* Email Field */}
             <div>
