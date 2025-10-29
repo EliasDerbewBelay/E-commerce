@@ -3,7 +3,16 @@ import { useEffect, useState } from "react";
 import { getProductById } from "@/services/productService";
 import { Product } from "@/types/product";
 import Image from "next/image";
-import { Star, Heart, Share2, Truck, Shield, ArrowLeft } from "lucide-react";
+import {
+  Star,
+  Heart,
+  Share2,
+  Truck,
+  Shield,
+  ArrowLeft,
+  Rss,
+} from "lucide-react";
+import { addToCart } from "@/services/cartService";
 
 export default function ProductDetailPage() {
   const router = useRouter();
@@ -15,6 +24,16 @@ export default function ProductDetailPage() {
   const [selectedImage, setSelectedImage] = useState(0);
   const [quantity, setQuantity] = useState(1);
 
+  const handleAddToCart = async () => {
+    const response = await addToCart(product.id);
+
+    if (response.error) {
+      alert(response.error);
+    } else {
+      alert("Item added to cart");
+    }
+  };
+  
   useEffect(() => {
     if (!id) return;
 
@@ -43,10 +62,6 @@ export default function ProductDetailPage() {
       ]
     : [];
 
-  const handleAddToCart = () => {
-    // Add to cart logic here
-    console.log(`Added ${quantity} of ${product?.name} to cart`);
-  };
 
   const handleBuyNow = () => {
     // Buy now logic here
