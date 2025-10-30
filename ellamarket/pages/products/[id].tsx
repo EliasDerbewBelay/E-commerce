@@ -3,15 +3,7 @@ import { useEffect, useState } from "react";
 import { getProductById } from "@/services/productService";
 import { Product } from "@/types/product";
 import Image from "next/image";
-import {
-  Star,
-  Heart,
-  Share2,
-  Truck,
-  Shield,
-  ArrowLeft,
-  Rss,
-} from "lucide-react";
+import { Star, Heart, Share2, Truck, Shield, ArrowLeft } from "lucide-react";
 import { addToCart } from "@/services/cartService";
 
 export default function ProductDetailPage() {
@@ -25,7 +17,8 @@ export default function ProductDetailPage() {
   const [quantity, setQuantity] = useState(1);
 
   const handleAddToCart = async () => {
-    const response = await addToCart(product.id);
+    if (!product) return;
+    const response = await addToCart(product.id, quantity);
 
     if (response.error) {
       alert(response.error);
@@ -33,7 +26,7 @@ export default function ProductDetailPage() {
       alert("Item added to cart");
     }
   };
-  
+
   useEffect(() => {
     if (!id) return;
 
@@ -61,7 +54,6 @@ export default function ProductDetailPage() {
         product.image_url,
       ]
     : [];
-
 
   const handleBuyNow = () => {
     // Buy now logic here

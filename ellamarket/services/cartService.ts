@@ -1,54 +1,88 @@
 import { supabase } from "@/lib/supabaseClient";
 
-export const addToCart = async (productId: number) => {
-  //Check if the user is logged in
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
-
-  if (!user) {
-    return { error: "You Must be Logged in to add items to cart." };
-  }
-
-  //   check if product already in cart
-  const { data: existingItem, error: existingError } = await supabase
-    .from("cart_items")
-    .select("*")
-    .eq("user_id", user.id)
-    .eq("product_id", productId)
-    .single();
-
-  if (existingError && existingItem !== "PGRST116") {
-    console.error(existingError);
-    return { error: "Something went wrong." };
-  }
-
-  //   if exists -> increase quantity
-  if (existingItem) {
-    const { error: updateError } = await supabase
-      .from("cart_items")
-      .update({ quantity: existingItem.quantity + 1 })
-      .eq("id", existingItem.id);
-
-    if (updateError) {
-      return { error: "Failed to update quantity. " };
+// ✅ Add product to cart or increase quantity
+export const addToCart = async (productId: number, quantity: number = 1) => {
+  try {
+    // ✅ Get logged in user
+    const { data: userData, error: userError } = await supabase.auth.getUser();
+    if (userError || !userData.user) {
+      return { error: "You must be logged in to add items to cart." };
     }
 
-    return { success: true, message: "Quantity updated" };
+    const userId = userData.user.id;
+
+    // ✅ Check if item already exists in cart
+    const { data: existingItem } = await supabase
+      .from("cart_items")
+      .select("*")
+      .eq("user_id", userId)
+      .eq("product_id", productId)
+      .single();
+
+    if (existingItem) {
+      // ✅ Update quantity
+      const { error: updateError } = await supabase
+        .from("cart_items")
+        .update({ quantity: existingItem.quantity + quantity })
+        .eq("id", existingItem.id);
+
+      if (updateError) return { error: updateError.message };
+
+      return { message: "Quantity updated" };
+    }
+
+    // ✅ Insert new item
+    const { error: insertError } = await supabase.from("cart_items").insert([
+      {
+        user_id: userId,
+        product_id: productId,
+        quantity,
+      },
+    ]);
+
+    if (insertError) return { error: insertError.message };
+
+    return { message: "Item added to cart" };
+  } catch (err: any) {
+    return { error: "Unexpected error adding to cart" };
   }
+};
 
-  //   otherwise insert new row
+// ✅ Fetch cart items for current user
+export const getCartItems = async () => {
+  const { data: userData, error: userError } = await supabase.auth.getUser();
+  if (userError || !userData.user) return { error: "User not logged in" };
 
-  const { error: insertError } = await supabase.from("cart_items").insert({
-    user_id: user.id,
-    produc_id: productId,
-    quantity: 1,
-  });
+  const userId = userData.user.id;
 
-  if (insertError) {
-    console.error(insertError);
-    return { error: "Failed to add to cart." };
-  }
+  // ✅ Join with product table for product details
+  const { data, error } = await supabase
+    .from("cart_items")
+    .select("id, quantity, products(*)") // requires foreign key relation
+    .eq("user_id", userId);
 
-  return { success: true, message: "Add to cart" };
+  return { data, error };
+};
+
+// ✅ Remove item from cart
+export const removeFromCart = async (cartItemId: number) => {
+  const { error } = await supabase
+    .from("cart_items")
+    .delete()
+    .eq("id", cartItemId);
+
+  return { error };
+};
+
+// ✅ Update quantity
+export const updateCartQuantity = async (
+  cartItemId: number,
+  quantity: number
+) => {
+  const { error } = await supabase
+    .from("cart_items")
+    .update({ quantity })
+    .eq("id", cartItemId);
+
+  return { error };
 };
