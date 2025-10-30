@@ -66,12 +66,12 @@ export const getCartItems = async () => {
 
 // ✅ Remove item from cart
 export const removeFromCart = async (cartItemId: number) => {
-  const { error } = await supabase
+  const { data, error } = await supabase
     .from("cart_items")
     .delete()
     .eq("id", cartItemId);
 
-  return { error };
+  return { data, error };
 };
 
 // ✅ Update quantity

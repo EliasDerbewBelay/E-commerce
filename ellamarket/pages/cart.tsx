@@ -3,6 +3,7 @@ import { getCartItems } from "@/services/cartService";
 import Image from "next/image";
 import Link from "next/link";
 import { supabase } from "@/lib/supabaseClient";
+import { removeFromCart } from "@/services/cartService";
 
 export default function CartPage() {
   const [cart, setCart] = useState<any[]>([]);
@@ -31,6 +32,13 @@ export default function CartPage() {
 
     checkUser();
   }, []);
+
+  const handleRemove = async (cartItemId: number) => {
+    const { error } = await removeFromCart(cartItemId);
+    if (!error) {
+      setCart(cart.filter((item) => item.id !== cartItemId));
+    }
+  };
 
   // Calculate totals
   const subtotal = cart.reduce(
@@ -175,7 +183,10 @@ export default function CartPage() {
                           </button>
                         </div>
 
-                        <button className="text-red-600 hover:text-red-800 text-sm font-medium transition-colors">
+                        <button
+                          onClick={() => handleRemove(item.id)}
+                          className="text-red-600 hover:text-red-800 text-sm font-medium transition-colors"
+                        >
                           Remove
                         </button>
                       </div>
