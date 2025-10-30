@@ -4,6 +4,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { supabase } from "@/lib/supabaseClient";
 import { removeFromCart } from "@/services/cartService";
+import { updateCartQuantity } from "@/services/cartService";
 
 export default function CartPage() {
   const [cart, setCart] = useState<any[]>([]);
@@ -38,6 +39,41 @@ export default function CartPage() {
     if (!error) {
       setCart(cart.filter((item) => item.id !== cartItemId));
     }
+  };
+
+  const handleIncrease = async (cartItemId: number) => {
+    const updatedCart = cart.map((item) => {
+      if (item.id === cartItemId) {
+        return { ...item, quantity: item.quantity + 1 };
+      }
+
+      return item;
+    });
+
+    setCart(updatedCart);
+    await updateCartQuantity(
+      cartItemId,
+      updatedCart.find((i) => i.id === cartItemId)
+    );
+  };
+
+  const handleDecrease = async (cartItemId: number) => {
+    const currentItem = cart.find((item) => item.id === cartItemId);
+    if (!currentItem || currentItem.quantity <= 1) return;
+
+    const updatedCart = cart.map((item) => {
+      if (item.id === cartItemId) {
+        return { ...item, quantity: item.quantity - 1 };
+      }
+
+      return item;
+    });
+
+    setCart(updatedCart);
+    await updateCartQuantity(
+      cartItemId,
+      updatedCart.find((i) => i.id === cartItemId)
+    );
   };
 
   // Calculate totals
@@ -172,13 +208,19 @@ export default function CartPage() {
 
                       <div className="flex items-center gap-4">
                         <div className="flex items-center border border-gray-300 rounded-lg">
-                          <button className="px-3 py-1 text-gray-600 hover:text-gray-800 transition-colors">
+                          <button
+                            onClick={() => handleDecrease(item.id)}
+                            className="px-3 py-1 text-gray-600 hover:text-gray-800 transition-colors"
+                          >
                             −
                           </button>
                           <span className="px-3 py-1 border-x border-gray-300 font-medium">
                             {item.quantity}
                           </span>
-                          <button className="px-3 py-1 text-gray-600 hover:text-gray-800 transition-colors">
+                          <button
+                            onClick={() => handleIncrease(item.id)}
+                            className="px-3 py-1 text-gray-600 hover:text-gray-800 transition-colors"
+                          >
                             +
                           </button>
                         </div>

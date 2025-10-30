@@ -79,10 +79,10 @@ export const updateCartQuantity = async (
   cartItemId: number,
   quantity: number
 ) => {
-  const { error } = await supabase
+  const { data, error } = await supabase
     .from("cart_items")
     .update({ quantity })
     .eq("id", cartItemId);
 
-  return { error };
+  return { data, error };
 };
