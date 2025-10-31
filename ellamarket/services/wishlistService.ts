@@ -146,3 +146,17 @@ export async function isInWishlist(productId: number) {
     return { error: { message: err?.message || "Unexpect Error" }, data: null };
   }
 }
+
+export const checkIfWishlisted = async (productId: number) => {
+  const user = (await supabase.auth.getUser()).data.user;
+  if (!user) return false;
+
+  const { data } = await supabase
+    .from("wishlist_items")
+    .select("id")
+    .eq("product_id", productId)
+    .eq("user_id", user.id)
+    .single();
+
+  return !!data;
+};

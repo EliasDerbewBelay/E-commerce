@@ -1,19 +1,59 @@
+"use client";
+
 import Image from "next/image";
 import { Star, Heart, ShoppingBag } from "lucide-react";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { ProductListProps } from "@/interface";
+import { addToWishlist, checkIfWishlisted } from "@/services/wishlistService";
+import { supabase } from "@/lib/supabaseClient";
+import toast from "react-hot-toast";
 
 const ProductCard: React.FC<ProductListProps> = ({ product }) => {
   const [isWishlisted, setIsWishlisted] = useState(false);
   const [imageLoaded, setImageLoaded] = useState(false);
 
-  const handleAddToCart = (e: React.MouseEvent) => {
+  // ✅ Check if product is already wishlisted
+  useEffect(() => {
+    const loadWishlistState = async () => {
+      const user = (await supabase.auth.getUser()).data.user;
+      if (!user) return;
+
+      const isSaved = await checkIfWishlisted(product.id);
+      setIsWishlisted(isSaved);
+    };
+
+    loadWishlistState();
+  }, [product.id]);
+
+  // ✅ Handle wishlist click
+  const handleWishlist = async (e: React.MouseEvent) => {
     e.stopPropagation();
+
+    const user = (await supabase.auth.getUser()).data.user;
+    if (!user) {
+      toast.error("Please login to add items to wishlist");
+      return;
+    }
+
+    const res = await addToWishlist(product.id);
+
+    if (res.error) {
+      toast.error("Something went wrong!");
+      return;
+    }
+
+    if (res.data?.exists) {
+      toast("Already in wishlist");
+    } else {
+      toast.success("Added to wishlist ❤️");
+    }
+
+    setIsWishlisted(true);
   };
 
-  const handleWishlist = (e: React.MouseEvent) => {
+  const handleAddToCart = (e: React.MouseEvent) => {
     e.stopPropagation();
-    setIsWishlisted(!isWishlisted);
+    // Cart logic will come later
   };
 
   return (
@@ -32,13 +72,12 @@ const ProductCard: React.FC<ProductListProps> = ({ product }) => {
             onLoad={() => setImageLoaded(true)}
           />
 
-          {/* Loading Skeleton */}
           {!imageLoaded && (
             <div className="absolute inset-0 bg-gray-200 animate-pulse" />
           )}
         </div>
 
-        {/* Wishlist Button */}
+        {/* ✅ Wishlist Button */}
         <button
           onClick={handleWishlist}
           className={`absolute top-3 right-3 p-2 rounded-full transition-all duration-200 ${
@@ -50,7 +89,7 @@ const ProductCard: React.FC<ProductListProps> = ({ product }) => {
           <Heart size={18} className={isWishlisted ? "fill-current" : ""} />
         </button>
 
-        {/* Category Badge */}
+        {/* Category */}
         {product.category && (
           <div className="absolute top-3 left-3">
             <span className="bg-black bg-opacity-70 text-white px-2 py-1 rounded text-xs font-medium">
@@ -59,7 +98,7 @@ const ProductCard: React.FC<ProductListProps> = ({ product }) => {
           </div>
         )}
 
-        {/* Add to Cart Button - Bottom */}
+        {/* Add to Cart */}
         <div className="absolute bottom-0 left-0 right-0 p-3 bg-gradient-to-t from-black/60 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300">
           <button
             onClick={handleAddToCart}
@@ -73,12 +112,10 @@ const ProductCard: React.FC<ProductListProps> = ({ product }) => {
 
       {/* Product Info */}
       <div className="p-4 space-y-3">
-        {/* Product Name */}
         <h3 className="font-semibold text-gray-900 line-clamp-2 leading-tight text-lg group-hover:text-blue-600 transition-colors">
           {product.name}
         </h3>
 
-        {/* Description */}
         <p className="text-gray-600 line-clamp-2 leading-relaxed text-sm">
           {product.description}
         </p>
@@ -103,7 +140,6 @@ const ProductCard: React.FC<ProductListProps> = ({ product }) => {
           </span>
         </div>
 
-        {/* Price */}
         <div className="flex items-center justify-between pt-2">
           <span className="text-2xl font-bold text-gray-900">
             ${product.price.toFixed(2)}

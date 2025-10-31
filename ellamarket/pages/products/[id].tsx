@@ -5,6 +5,9 @@ import { Product } from "@/types/product";
 import Image from "next/image";
 import { Star, Heart, Share2, Truck, Shield, ArrowLeft } from "lucide-react";
 import { addToCart } from "@/services/cartService";
+import { addToWishlist, checkIfWishlisted } from "@/services/wishlistService";
+import toast from "react-hot-toast";
+import { supabase } from "@/lib/supabaseClient";
 
 export default function ProductDetailPage() {
   const router = useRouter();
@@ -15,6 +18,7 @@ export default function ProductDetailPage() {
   const [error, setError] = useState<string | null>(null);
   const [selectedImage, setSelectedImage] = useState(0);
   const [quantity, setQuantity] = useState(1);
+  const [isWishlisted, setIsWishlisted] = useState(false);
 
   const handleAddToCart = async () => {
     if (!product) return;
@@ -45,6 +49,41 @@ export default function ProductDetailPage() {
 
     fetchProduct();
   }, [id]);
+
+  useEffect(() => {
+    const checkWishlistState = async () => {
+      if (!product) return;
+      const isSaved = await checkIfWishlisted(product.id);
+      setIsWishlisted(isSaved);
+    };
+
+    checkWishlistState();
+  }, [product]);
+
+  const handleWishlist = async () => {
+    if (!product) return;
+
+    const user = (await supabase.auth.getUser()).data.user;
+    if (!user) {
+      toast.error("Please log in to add items to wishlist");
+      return;
+    }
+
+    const res = await addToWishlist(product.id);
+
+    if (res.error) {
+      toast.error("Something went wrong");
+      return;
+    }
+
+    if (res.data?.exists) {
+      toast("Already in wishlist");
+    } else {
+      toast.success("Added to wishlist ❤️");
+    }
+
+    setIsWishlisted(true);
+  };
 
   // Mock multiple images - in real app, this would come from API
   const productImages = product
@@ -174,7 +213,10 @@ export default function ProductDetailPage() {
                 {product.category}
               </span>
               <div className="flex items-center gap-2">
-                <button className="p-2 text-gray-400 hover:text-red-500 transition-colors">
+                <button
+                  onClick={handleWishlist}
+                  className="p-2 text-gray-400 hover:text-red-500 transition-colors"
+                >
                   <Heart size={20} />
                 </button>
                 <button className="p-2 text-gray-400 hover:text-blue-500 transition-colors">
