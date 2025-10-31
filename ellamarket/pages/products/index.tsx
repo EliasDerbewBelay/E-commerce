@@ -6,7 +6,7 @@ import Link from "next/link";
 import ProductCard from "@/components/productCards/ProductCard";
 import ProductCardListView from "@/components/productCards/ProductCardListView";
 
-const products: React.FC<ProductListProps> = ({ product }) => {
+const Products: React.FC<ProductListProps> = ({ product }) => {
   const [products, setProducts] = useState<Product[]>([]);
   const [viewMode, setViewMode] = useState<"grid" | "list">("grid");
   const [sortBy, setSortBy] = useState("newest");
@@ -260,4 +260,4 @@ const products: React.FC<ProductListProps> = ({ product }) => {
   );
 };
 
-export default products;
+export default Products;
