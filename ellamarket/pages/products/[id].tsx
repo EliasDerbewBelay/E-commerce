@@ -5,9 +5,9 @@ import { Product } from "@/types/product";
 import Image from "next/image";
 import { Star, Heart, Share2, Truck, Shield, ArrowLeft } from "lucide-react";
 import { addToCart } from "@/services/cartService";
-import { addToWishlist, checkIfWishlisted } from "@/services/wishlistService";
 import toast from "react-hot-toast";
 import { supabase } from "@/lib/supabaseClient";
+import { addToWishlist } from "@/services/wishlistService";
 
 export default function ProductDetailPage() {
   const router = useRouter();
@@ -18,7 +18,7 @@ export default function ProductDetailPage() {
   const [error, setError] = useState<string | null>(null);
   const [selectedImage, setSelectedImage] = useState(0);
   const [quantity, setQuantity] = useState(1);
-  const [isWishlisted, setIsWishlisted] = useState(false);
+  const [isAddingToWishlist, setIsAddingToWishlist] = useState(false);
 
   const handleAddToCart = async () => {
     if (!product) return;
@@ -28,6 +28,29 @@ export default function ProductDetailPage() {
       alert(response.error);
     } else {
       alert("Item added to cart");
+    }
+  };
+
+  const handleToWishlist = async (e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+
+    if (!product || isAddingToWishlist) return;
+
+    setIsAddingToWishlist(true);
+    try {
+      const response = await addToWishlist(product.id);
+
+      if (response.error) {
+        toast.error("Something went wrong");
+      } else {
+        toast.success("Added to Wishlist");
+      }
+    } catch (err: any) {
+      console.error("Adding to wishlist error:", err);
+      toast.error("Network error! Please try again ");
+    } finally {
+      setIsAddingToWishlist(false);
     }
   };
 
@@ -49,41 +72,6 @@ export default function ProductDetailPage() {
 
     fetchProduct();
   }, [id]);
-
-  useEffect(() => {
-    const checkWishlistState = async () => {
-      if (!product) return;
-      const isSaved = await checkIfWishlisted(product.id);
-      setIsWishlisted(isSaved);
-    };
-
-    checkWishlistState();
-  }, [product]);
-
-  const handleWishlist = async () => {
-    if (!product) return;
-
-    const user = (await supabase.auth.getUser()).data.user;
-    if (!user) {
-      toast.error("Please log in to add items to wishlist");
-      return;
-    }
-
-    const res = await addToWishlist(product.id);
-
-    if (res.error) {
-      toast.error("Something went wrong");
-      return;
-    }
-
-    if (res.data?.exists) {
-      toast("Already in wishlist");
-    } else {
-      toast.success("Added to wishlist ❤️");
-    }
-
-    setIsWishlisted(true);
-  };
 
   // Mock multiple images - in real app, this would come from API
   const productImages = product
@@ -214,7 +202,7 @@ export default function ProductDetailPage() {
               </span>
               <div className="flex items-center gap-2">
                 <button
-                  onClick={handleWishlist}
+                  onClick={handleToWishlist}
                   className="p-2 text-gray-400 hover:text-red-500 transition-colors"
                 >
                   <Heart size={20} />
