@@ -207,9 +207,9 @@ const Products: React.FC<ProductListProps> = ({ product }) => {
                     key={product.id}
                     className="bg-white rounded-lg shadow-sm border border-slate-200 hover:shadow-md transition-shadow duration-200"
                   >
-                    <Link href={`/products/${product.id}`}>
+                    {/* <Link href={`/products/${product.id}`}> */}
                       <ProductCard product={product} />
-                    </Link>
+                    {/* </Link> */}
                   </div>
                 ))}
               </div>
