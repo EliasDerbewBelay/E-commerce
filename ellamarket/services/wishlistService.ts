@@ -1,162 +1,72 @@
 import { supabase } from "@/lib/supabaseClient";
 
-type Result<T> =
-  | { error: null; data: T }
-  | { error: { message: string; code?: string | number } | null; data?: null };
-
-export async function addToWishlist(productId: number) {
+export const addToWishlist = async (
+  productId: number,
+  quantity: number = 1
+) => {
   try {
-    const { data: userData, error: userErr } = await supabase.auth.getUser();
-    if (userErr || !userData.user) {
-      return { error: { message: "User not authenticated" } } as Result<null>;
+    const { data: userData, error: userError } = await supabase.auth.getUser();
+
+    if (userError || !userData.user) {
+      return { error: "You Must be logged in to add items to cart." };
     }
 
     const userId = userData.user.id;
 
-    const { data, error } = await supabase
+    const { data: existingItem } = await supabase
       .from("wishlist_items")
-      .insert({ user_id: userId, product_id: productId })
-      .select()
-      .single();
-
-    if (error) {
-      if (
-        (error.code && String(error.code).includes("23505")) ||
-        (error.details &&
-          String(error.details).toLowerCase().includes("unique"))
-      ) {
-        return { error: null, data: { exists: true } } as Result<any>;
-      }
-
-      return {
-        error: { message: error.message, code: error.code },
-        data: null,
-      };
-    }
-
-    return { error: null, data };
-  } catch (err: any) {
-    return {
-      error: { message: err?.message || "Unexpected error" },
-      data: null,
-    };
-  }
-}
-
-export async function removeFromWishlistById(wishlistId: number | string) {
-  try {
-    const { data, error } = await supabase
-      .from("wishlist_items")
-      .delete()
-      .eq("id", wishlistId);
-
-    if (error)
-      return {
-        error: { message: error.message, code: error.code },
-        data: null,
-      };
-    return { error: null, data };
-  } catch (err: any) {
-    return {
-      error: { message: err?.message || "Unexpected error" },
-      data: null,
-    };
-  }
-}
-
-export async function removeFromWishlistByProductId(proudctId: number) {
-  try {
-    const { data: userData } = await supabase.auth.getUser();
-    if (!userData?.user)
-      return { error: { message: "User not authenticated" }, data: null };
-
-    const userId = userData.user.id;
-    const { data, error } = await supabase
-      .from("wishlist_items")
-      .delete()
-      .eq("user_id", userId)
-      .eq("product_id", proudctId);
-
-    if (error)
-      return {
-        error: { message: error.message, code: error.code },
-        data: null,
-      };
-    return { error: null, data };
-  } catch (err: any) {
-    return {
-      error: { message: err?.message || "Unexpected error" },
-      data: null,
-    };
-  }
-}
-
-export async function getWishListForCurrentUser() {
-  try {
-    const { data: userData, error: userErr } = await supabase.auth.getUser();
-    if (userErr || !userData?.user) {
-      return { error: { message: "User not authenticated" }, data: null };
-    }
-
-    const userId = userData.user.id;
-    const { data, error } = await supabase
-      .from("wishlist_items")
-      .select(
-        `id, created_at, product_id, products (
-      id, name, price, image_url, description, category)`
-      )
-      .eq("user_id", userId)
-      .order("created_at", { ascending: false });
-
-    if (error)
-      return {
-        error: { message: error.message, code: error.code },
-        data: null,
-      };
-    return { error: null, data };
-  } catch (err: any) {
-    return {
-      error: { message: err?.message || "Unexpected error" },
-      data: null,
-    };
-  }
-}
-
-export async function isInWishlist(productId: number) {
-  try {
-    const { data: userData } = await supabase.auth.getUser();
-    if (!userData?.user)
-      return { error: { message: "User not authenticated" }, data: null };
-
-    const userId = userData.user.id;
-    const { data, error } = await supabase
-      .from("wishlist_items")
-      .select("id")
+      .select("*")
       .eq("user_id", userId)
       .eq("product_id", productId)
-      .maybeSingle();
+      .single();
 
-    if (error)
-      return {
-        error: { message: error.message, code: error.code },
-        data: null,
-      };
-    return { error: null, data };
+    if (existingItem) {
+      const { error: updateError } = await supabase
+        .from("wishlist_items")
+        .update({ quantity: existingItem.quantity + quantity })
+        .eq("id", existingItem.id);
+
+      if (updateError) return { error: updateError.message };
+      return { message: "Quantity updated" };
+    }
+
+    const { error: insertError } = await supabase
+      .from("wishlist_items")
+      .insert([
+        {
+          user_Id: userId,
+          product_id: productId,
+          quantity,
+        },
+      ]);
+
+    if (insertError) return { error: insertError.message };
+    return { message: "Item added to cart" };
   } catch (err: any) {
-    return { error: { message: err?.message || "Unexpect Error" }, data: null };
+    return { error: "Unexpected error adding to cart" };
   }
-}
+};
 
-export const checkIfWishlisted = async (productId: number) => {
-  const user = (await supabase.auth.getUser()).data.user;
-  if (!user) return false;
+export const getWishlistItems = async () => {
+  const { data: userData, error: userError } = await supabase.auth.getUser();
 
-  const { data } = await supabase
+  if (userError || !userData.user) return { error: "User not logged in" };
+
+  const userId = userData.user.id;
+
+  const { data, error } = await supabase
     .from("wishlist_items")
-    .select("id")
-    .eq("product_id", productId)
-    .eq("user_id", user.id)
-    .single();
+    .select("id, quantity, products(*)")
+    .eq("user_id", userId);
 
-  return !!data;
+  return { data, error };
+};
+
+export const removeFromWishlist = async (wishlistItemId: number) => {
+  const { data, error } = await supabase
+    .from("wishlist_items")
+    .delete()
+    .eq("id", wishlistItemId);
+
+  return { data, error };
 };

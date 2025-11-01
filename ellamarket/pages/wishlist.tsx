@@ -1,89 +1,152 @@
-"use client";
-
-import { useEffect, useState } from "react";
+import { useState, useEffect } from "react";
 import {
-  getWishListForCurrentUser,
-  removeFromWishlistById,
+  getWishlistItems,
+  removeFromWishlist,
 } from "@/services/wishlistService";
-import toast from "react-hot-toast";
+import { supabase } from "@/lib/supabaseClient";
 import Link from "next/link";
 import Image from "next/image";
 
-export default function WishlistPage() {
-  const [items, setItems] = useState<any[]>([]);
+const WishlistPage: React.FC = () => {
+  const [wishlist, setWishlist] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
-
-  const loadWishlist = async () => {
-    setLoading(true);
-    const res = await getWishListForCurrentUser();
-
-    if (res.error) toast.error(res.error.message);
-    else setItems(res.data || []);
-
-    setLoading(false);
-  };
+  const [user, setUser] = useState<any>(null);
 
   useEffect(() => {
-    loadWishlist();
+    const userChecker = async () => {
+      const { data } = await supabase.auth.getUser();
+
+      if (!data.user) {
+        setUser(null);
+        setLoading(false);
+        return;
+      }
+
+      setUser(data.user);
+      fetchWishlist();
+    };
+
+    const fetchWishlist = async () => {
+      const { data, error } = await getWishlistItems();
+      if (!error && data) setWishlist(data);
+      setLoading(false);
+    };
+
+    userChecker();
   }, []);
 
-  const handleRemove = async (id: number) => {
-    const res = await removeFromWishlistById(id);
-
-    if (!res.error) {
-      toast.success("Removed from wishlist");
-      setItems((prev) => prev.filter((item) => item.product.id !== id));
-    } else {
-      toast.error(res.error.message);
+  const handleRemove = async (wishlistId: number) => {
+    const { error } = await removeFromWishlist(wishlistId);
+    if (!error) {
+      setWishlist(wishlist.filter((item) => item.id !== wishlistId));
     }
   };
 
-  if (loading) return <p className="p-8">Loading wishlist ...</p>;
-
-  return (
-    <div className="p-6">
-      <h1 className="text-2xl font-bold mb-4">My Wishlist ❤️</h1>
-
-      {items.length === 0 ? (
-        <p>No items in wishlist</p>
-      ) : (
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          {items.map((item) => {
-            const product = item.product; // ✅ FIX
-            if (!product) return null;
-
-            return (
-              <div key={product.id} className="border p-3 rounded-lg">
-                <Image
-                  src={product.image_url}
-                  alt={product.name}
-                  width={500}
-                  height={300}
-                  className="h-48 w-full object-cover rounded"
-                />
-
-                <h3 className="font-semibold mt-2">{product.name}</h3>
-                <p className="text-gray-700">${product.price}</p>
-
-                <div className="flex gap-3 mt-2">
-                  <button
-                    onClick={() => handleRemove(product.id)}
-                    className="bg-red-600 text-white py-1 px-3 rounded"
-                  >
-                    Remove
-                  </button>
-
-                  <Link href={`/product/${product.id}`}>
-                    <button className="bg-blue-600 text-white py-1 px-3 rounded">
-                      View Product
-                    </button>
-                  </Link>
-                </div>
-              </div>
-            );
-          })}
+  if (loading)
+    return (
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spine rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
+          <p className="text-gray-600">Loading Your Wishlist ...</p>
         </div>
-      )}
+      </div>
+    );
+
+  if (!user)
+    return (
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center px-4">
+        <div className="max-w-md w-full bg-white rounded-2xl shadow-sm p-8 text-center">
+          <div className="w-16 h-16 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-4">
+            <svg
+              className="w-8 h-8 text-blue-600"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"
+              />
+            </svg>
+          </div>
+          <h2 className="text-2xl font-bold text-gray-900 mb-2">
+            Sign in required
+          </h2>
+          <p className="text-gray-600 mb-6">
+            Please log in to view your shopping cart
+          </p>
+          <Link
+            href="/login"
+            className="inline-flex items-center justify-center bg-blue-600 hover:bg-blue-700 text-white font-medium px-6 py-3 rounded-lg transition-colors duration-200"
+          >
+            Sign In
+          </Link>
+        </div>
+      </div>
+    );
+
+  if (wishlist.length === 0)
+    return (
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center px-4">
+        <div className="max-w-md w-full bg-white rounded-2xl shadow-sm p-8 text-center">
+          <div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
+            <svg
+              className="w-8 h-8 text-gray-400"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z"
+              />
+            </svg>
+          </div>
+          <h2 className="text-2xl font-bold text-gray-900 mb-2">
+            Your wishlist is empty
+          </h2>
+          <p className="text-gray-600 mb-6">
+            Start adding some products to your wishlist
+          </p>
+          <Link
+            href="/products"
+            className="inline-flex items-center justify-center bg-gray-900 hover:bg-gray-800 text-white font-medium px-6 py-3 rounded-lg transition-colors duration-200"
+          >
+            Continue Shopping
+          </Link>
+        </div>
+      </div>
+    );
+  return (
+    <div>
+      {wishlist.map((item) => (
+        <div key={item.id}>
+          <div>
+            <Image
+              src={item.product.image_url}
+              alt={item.product.name}
+              width={100}
+              height={100}
+              className="rounded-lg object-cover"
+            />
+          </div>
+
+          <div>
+            <h3>{item.product.name}</h3>
+            <p>${item.product.price.toFixed(2)} each</p>
+
+            <div>
+              <button onClick={() => handleRemove(item.id)}>Remove</button>
+            </div>
+          </div>
+        </div>
+      ))}
     </div>
   );
-}
+};
+
+export default WishlistPage;

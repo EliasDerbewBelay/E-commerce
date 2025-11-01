@@ -7,11 +7,13 @@ import { ProductListProps } from "@/interface";
 import toast from "react-hot-toast";
 import { addToCart } from "@/services/cartService";
 import Link from "next/link";
+import { addToWishlist } from "@/services/wishlistService";
 
 const ProductCard: React.FC<ProductListProps> = ({ product }) => {
   const [isWishlisted, setIsWishlisted] = useState(false);
   const [imageLoaded, setImageLoaded] = useState(false);
   const [isAddingToCart, setIsAddingToCart] = useState(false);
+  const [isAddingToWishlist, setIsAddingToWishlist] = useState(false);
 
   const handleAddToCart = async (e: React.MouseEvent) => {
     e.preventDefault();
@@ -34,6 +36,28 @@ const ProductCard: React.FC<ProductListProps> = ({ product }) => {
       toast.error("Network error! Please try again");
     } finally {
       setIsAddingToCart(false);
+    }
+  };
+
+  const handleWishlist = async (e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+
+    if (!product || isAddingToWishlist) return;
+
+    setIsAddingToWishlist(true);
+    try {
+      const response = await addToWishlist(product.id);
+      if (response.error) {
+        toast.error("Something went wrong!");
+      } else {
+        toast.success("Added to Wishlist");
+      }
+    } catch (err: any) {
+      console.error("Adding to wishlist error:", err);
+      toast.error("Network error! Please try again");
+    } finally {
+      setIsAddingToWishlist(false);
     }
   };
 
@@ -62,6 +86,7 @@ const ProductCard: React.FC<ProductListProps> = ({ product }) => {
 
         {/* ✅ Wishlist Button */}
         <button
+          onClick={handleWishlist}
           className={`absolute top-3 right-3 p-2 rounded-full transition-all duration-200 ${
             isWishlisted
               ? "bg-red-500 text-white shadow-md"
