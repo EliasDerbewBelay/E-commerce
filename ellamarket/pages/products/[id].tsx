@@ -82,7 +82,37 @@ export default function ProductDetailPage() {
       ]
     : [];
 
-  const handleBuyNow = () => {
+  const handleBuyNow = async () => {
+    if(!product) return;
+
+    const {data: {session}} = await supabase.auth.getSession();
+    if(!session) {
+      toast.error("Please login first");
+      return router.push("/auth/login");
+    }
+
+    try {
+      const res = await fetch("/api/buy-now", {
+        method: "POST",
+        headers: {"Content-Type": "application/json"},
+        body: JSON.stringify({
+          product_id: product.id,
+          quantity: quantity,
+        })
+      })
+
+      const data = await res.json();
+
+      if(data?.url){
+        window.location.href = data.url;
+      } else {
+        toast.error("Unable to start chackout.")
+        console.log("Strip Error:", data)
+      }
+    } catch(err: any){
+      console.error("Unable to start checkout")
+      toast.error("Network error - try again")
+    }
     // Buy now logic here
     console.log(`Buying ${quantity} of ${product?.name}`);
   };

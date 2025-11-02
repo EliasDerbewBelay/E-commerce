@@ -18,6 +18,9 @@ const Home: React.FC = () => {
     fetchProducts();
   }, []);
 
+  // Get first 12 products for the landing page
+  const featuredProducts = products.slice(0, 12);
+
   return (
     <div className="min-h-screen bg-white">
       <section className="relative bg-gradient-to-br from-slate-50 via-white to-blue-50 overflow-hidden">
@@ -35,9 +38,9 @@ const Home: React.FC = () => {
             </p>
           </div>
 
-          {products.length > 0 ? (
+          {featuredProducts.length > 0 ? (
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8">
-              {products.map((product) => (
+              {featuredProducts.map((product) => (
                 <ProductCard key={product.id} product={product} />
               ))}
             </div>
@@ -51,7 +54,7 @@ const Home: React.FC = () => {
           <div className="text-center mt-12">
             <Link href="/products">
               <button className="bg-white text-slate-900 border-2 border-slate-300 px-8 py-4 rounded-2xl font-semibold hover:border-slate-400 hover:bg-slate-50 transform hover:-translate-y-1 transition-all duration-300 inline-flex items-center gap-3 shadow-sm hover:shadow-md">
-                View All Products
+                View All Products ({products.length})
                 <ArrowRight className="w-5 h-5" />
               </button>
             </Link>
